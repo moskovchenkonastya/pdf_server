@@ -382,8 +382,10 @@ class MyHandler (BaseHTTPRequestHandler):
         self.send_error(404, 'File Not Found: %s' % self.path)
 
     def save_file(self, to_file):
-
+        
+        # cчитываем размер файла
         request_sz = int(self.headers["Content-length"])
+        # считываем поток
         request_str = self.rfile.read(request_sz)
         
         f = open(to_file, "wb")
@@ -439,15 +441,17 @@ class MyHandler (BaseHTTPRequestHandler):
 
 
     def do_POST_QR(self):
+        # считываем параметры из браузера
         params = parse_qs(self.path.split('?')[1])
-
+        
+        # описываем имена временных файлов
         file_type = params[u"type"][0]
         filename = tempfile.TemporaryFile(mode ="r", suffix = ("." + file_type)).name 
         pdf_result = tempfile.TemporaryFile(mode ="r", suffix = ".pdf").name 
 
         # сохраняем файл с сервера
         self.save_file (filename)
-
+        # проверяем нужно ли конвертировать файл
         pdf = tempfile.TemporaryFile(mode ="r", suffix = ".pdf").name
         if (need_to_convert (file_type)):
             convert_to_pdf(filename, file_type, pdf)
@@ -459,11 +463,12 @@ class MyHandler (BaseHTTPRequestHandler):
         # формируем временный файл c QR кодом
         qr_code_image = tempfile.TemporaryFile(mode ="r", suffix = ".png").name
 
-
+        
         text_qr         = urllib.unquote(params[u"text"][0]).decode('utf8')         if u"text" in params else "" 
         company_qr      = urllib.unquote(params[u"company"][0]).decode('utf8')      if u"company" in params else "" 
         reg_number      = urllib.unquote(params[u"reg_number"][0]).decode('utf8')   if u"reg_number" in params else ""
-
+        
+        # формирование qr - кода
         if get_qr_code (text_qr, company_qr, reg_number, qr_code_image):
             add_qr_code (pdf, pdf_result, qr_code_image)
 
@@ -491,10 +496,13 @@ class MyHandler (BaseHTTPRequestHandler):
         if get_qr_code (text_qr, company_qr, reg_number, qr_code_image):
             self.upload_qr_code(qr_code_image)
 
-#        self.upload_file (pdf_result)
+        #   self.upload_file (pdf_result)
 
         pass
+    
+    # вставка штампа на первую страницу
     def do_POST_STAMP(self):
+        
         params = parse_qs(self.path.split('?')[1])
       
 
@@ -513,7 +521,7 @@ class MyHandler (BaseHTTPRequestHandler):
         else:
             convert_pdf_pdf(filename, pdf)
 
-        # формируем временный файл c QR кодом
+        # формируем временный файл cо штампом
 
         document    = urllib.unquote(params[u"document"][0]).decode('utf8') 
         reg_number  = urllib.unquote(params[u"reg_number"][0]).decode('utf8') 
@@ -525,6 +533,7 @@ class MyHandler (BaseHTTPRequestHandler):
         self.upload_file (pdf_result) 
         pass
 
+    
     def do_POST_CONF(self):
         params = parse_qs(self.path.split('?')[1])
       
@@ -555,6 +564,7 @@ class MyHandler (BaseHTTPRequestHandler):
         self.upload_file (pdf_result) 
         pass
 
+    
     def do_POST_VIEWER(self):
 
         params = parse_qs(self.path.split('?')[1])
@@ -597,6 +607,7 @@ class MyHandler (BaseHTTPRequestHandler):
 
         pass
 
+    
     def do_POST(self):
 
         if ("/qr" in self.path):
