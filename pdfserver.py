@@ -16,7 +16,7 @@ from baseimagetvsz import  TVSZImage
 
 from wand.image import Image as WandImage
 
-# определем
+# definition
 from PyPDF2 import PdfFileWriter, PdfFileReader
 from reportlab.pdfgen import canvas
 from reportlab.lib.units import mm
@@ -26,7 +26,7 @@ from reportlab.pdfbase.ttfonts import TTFont
 
 from PIL import ImageFont, ImageDraw, Image as Image
 
-# библиотека для работы с COM объектами
+# Library for working with COM objects
 import win32com.client as win32
 
 
@@ -117,7 +117,7 @@ def convert_word_to_pdf(doc_path, to_pdf_path, custom_page = None):
 
 def convert_excel_to_pdf(excel_path, to_pdf_path, custom_page = None):
 
-    # для Excel всегда будет одна страница
+    # for Excel format always be a one page
     page_count = 1
     try:
         excel = win32.Dispatch('Excel.Application')
@@ -338,13 +338,12 @@ def add_stamp (source_pdf_file, to_pdf_path, type_reg, number_reg, date_reg):
     for i in range(0,filedocs.getNumPages()):
         page = filedocs.getPage(i)
 
-        # вставляем штамп
+        # Paste stamp
         if (i == 0 and get_stamp (stamp, (int(page.mediaBox[2]), int(page.mediaBox[3])), type_reg, number_reg, date_reg)) :
             overlay  = PdfFileReader(file(stamp,"rb")).getPage(0)
             page.mergePage(overlay)
 
         output.addPage(page)
-
 
     res = file(to_pdf_path,"wb")
     output.write(res)
@@ -360,7 +359,7 @@ def add_conf (source_pdf_file, to_pdf_path, company_reg):
     for i in range(0,filedocs.getNumPages()):
         page = filedocs.getPage(i)
 
-        # вставляем штамп
+        # Paste stamp
         if (i == 0 and get_conf (stamp, (int(page.mediaBox[2]), int(page.mediaBox[3])), company_reg)) :
             overlay  = PdfFileReader(file(stamp,"rb")).getPage(0)
             page.mergePage(overlay)
@@ -383,9 +382,9 @@ class MyHandler (BaseHTTPRequestHandler):
 
     def save_file(self, to_file):
         
-        # cчитываем размер файла
+        # Read the file size
         request_sz = int(self.headers["Content-length"])
-        # считываем поток
+        # Read the stream
         request_str = self.rfile.read(request_sz)
         
         f = open(to_file, "wb")
@@ -441,17 +440,17 @@ class MyHandler (BaseHTTPRequestHandler):
 
 
     def do_POST_QR(self):
-        # считываем параметры из браузера
+        # Read parameters from the browser
         params = parse_qs(self.path.split('?')[1])
         
-        # описываем имена временных файлов
+        # Describe the names of temporary files
         file_type = params[u"type"][0]
         filename = tempfile.TemporaryFile(mode ="r", suffix = ("." + file_type)).name 
         pdf_result = tempfile.TemporaryFile(mode ="r", suffix = ".pdf").name 
 
-        # сохраняем файл с сервера
+        # save the file from the server
         self.save_file (filename)
-        # проверяем нужно ли конвертировать файл
+        # Check if you need to convert the file
         pdf = tempfile.TemporaryFile(mode ="r", suffix = ".pdf").name
         if (need_to_convert (file_type)):
             convert_to_pdf(filename, file_type, pdf)
@@ -460,7 +459,7 @@ class MyHandler (BaseHTTPRequestHandler):
             convert_pdf_pdf(filename, pdf)
 
 
-        # формируем временный файл c QR кодом
+        # Generate temporary file with QR code
         qr_code_image = tempfile.TemporaryFile(mode ="r", suffix = ".png").name
 
         
@@ -468,7 +467,7 @@ class MyHandler (BaseHTTPRequestHandler):
         company_qr      = urllib.unquote(params[u"company"][0]).decode('utf8')      if u"company" in params else "" 
         reg_number      = urllib.unquote(params[u"reg_number"][0]).decode('utf8')   if u"reg_number" in params else ""
         
-        # формирование qr - кода
+        # Qr code generation
         if get_qr_code (text_qr, company_qr, reg_number, qr_code_image):
             add_qr_code (pdf, pdf_result, qr_code_image)
 
@@ -483,11 +482,11 @@ class MyHandler (BaseHTTPRequestHandler):
         file_type = params[u"type"][0]
         filename = tempfile.TemporaryFile(mode ="r", suffix = ("." + file_type)).name 
 
-        # формируем временный файл c QR кодом
+        # Generate temporary file with QR code
         qr_code_image = tempfile.TemporaryFile(mode ="r", suffix = ".png").name
 
 
-        # формируем временный файл c QR кодом
+        # Generate temporary file with QR code
         text_qr         = urllib.unquote(params[u"text"][0]).decode('utf8')         if u"text"       in params else "" 
         company_qr      = urllib.unquote(params[u"company"][0]).decode('utf8')      if u"company"    in params else "" 
 
@@ -500,7 +499,7 @@ class MyHandler (BaseHTTPRequestHandler):
 
         pass
     
-    # вставка штампа на первую страницу
+    # Inserting a stamp on the first page
     def do_POST_STAMP(self):
         
         params = parse_qs(self.path.split('?')[1])
@@ -511,7 +510,7 @@ class MyHandler (BaseHTTPRequestHandler):
         filename = tempfile.TemporaryFile(mode ="r", suffix = ("." + file_type)).name 
         pdf_result = tempfile.TemporaryFile(mode ="r", suffix = ".pdf").name 
 
-        # сохраняем файл с сервера
+        # save the file from the server
         self.save_file (filename)
 
         pdf = tempfile.TemporaryFile(mode ="r", suffix = ".pdf").name
@@ -521,7 +520,7 @@ class MyHandler (BaseHTTPRequestHandler):
         else:
             convert_pdf_pdf(filename, pdf)
 
-        # формируем временный файл cо штампом
+        # Generate temporary file with stamp
 
         document    = urllib.unquote(params[u"document"][0]).decode('utf8') 
         reg_number  = urllib.unquote(params[u"reg_number"][0]).decode('utf8') 
@@ -543,7 +542,7 @@ class MyHandler (BaseHTTPRequestHandler):
         filename = tempfile.TemporaryFile(mode ="r", suffix = ("." + file_type)).name 
         pdf_result = tempfile.TemporaryFile(mode ="r", suffix = ".pdf").name 
 
-        # сохраняем файл с сервера
+        # save the file from the server
         self.save_file (filename)
 
         pdf = tempfile.TemporaryFile(mode ="r", suffix = ".pdf").name
@@ -553,7 +552,7 @@ class MyHandler (BaseHTTPRequestHandler):
         else:
             convert_pdf_pdf(filename, pdf)
 
-        # формируем временный файл c QR кодом
+        # Generate temporary file with QR code
 
         #document    = urllib.unquote(params[u"document"][0]).decode('utf8') 
         company     = urllib.unquote(params[u"company"][0]).decode('utf8') 
@@ -576,7 +575,7 @@ class MyHandler (BaseHTTPRequestHandler):
         key_cache   = params[u"version"][0] + "_" + str(num_page)
 
 
-        # сохраняем файл с сервера
+        # save the file from the server
         self.save_file (filename)
 
         if key_cache in __CACHE__:
@@ -590,7 +589,7 @@ class MyHandler (BaseHTTPRequestHandler):
             else:   
                 page_count = convert_pdf_pdf(filename, pdf, num_page)
 
-            # конвертируем файл
+            # Convert the file
             png_result = tempfile.TemporaryFile(mode ="r", suffix = ".png").name
 
             cache_value = dict()
@@ -598,7 +597,7 @@ class MyHandler (BaseHTTPRequestHandler):
             cache_value["fileName"]     = png_result
             __CACHE__[key_cache]        = cache_value 
 
-            # если конвертация прошла успешно
+            
             if convert_pdf_to_png (pdf, png_result, 1):
 
                 self.upload_image(cache_value)
